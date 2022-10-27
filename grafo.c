@@ -125,6 +125,7 @@ void fazerTxt(double **matrix) // le a matriz e cria um txt
     if (matrix == NULL)
         return;
     char buffer[100];
+    int count =0;
     FILE *fp = fopen("grafo.txt", "w");
     if (fp == NULL)
     {
@@ -222,8 +223,9 @@ void normaliza(double **matrix, double menor, double maior)
 double acuracia()
 {
     FILE *f = fopen("grafo.txt", "r");
-    int v1 = 0, v2 = 0, tam = 0;
-    int tp = 0, fp = 0, fn = 0, tn = 0;
+    int v1holder = 1, v1 = 0, v2 = 0, tam = 0, conex = 0;
+    int sc, flag = 0;
+    int tp = 0, fp = 0, fn = 0, tn = 0, total_tp = 0, total_fp = 0, total_fn = 0, total_tn = 0;
     if (f == NULL)
     {
         return -1.0;
@@ -231,30 +233,108 @@ double acuracia()
     fscanf(f, "%d", &tam);
     if (tam == 0)
         return -1.0;
-    for(int i = 0; i <tam; i += 1)
-    {
-        fscanf(f, "%d %d", &v1, &v2);
-        if (v1 <= 50 && v2 <= 50)
-        {
-            tp += 2;
+    fscanf(f, "%d %d", &v1, &v2);
+    printf("para calcular a acuracia das Setosas digite 1\npara a acuracia das Versicolors digite 2\npara a acuracia das Virginicas digite 3\n");
+    scanf("%d", &sc);
+        switch (sc){
+            case 1:
+                while(1){
+                    if(v1 == 149)
+                        flag = 1; //define a flag para encerrar a verificação
+                    if (v1 <= 50 && v2 <= 50) //começa aqui a verificação da acuracia
+                        tp += 1;    //caso ambos sejam do mesmo conjunto, e o conjunto é o que estamos calculando a acuracia, adicionamos um positivo verdadeiro
+                    else if ((v1 <= 50 && v2 > 50))
+                        fp += 1;    //caso um pertença ao conjunto correto, mas o outro não, adicionamos um falso positivo
+                    else
+                        tn += 1;    //caso ambos não pertençãm ao conjunto, adicionamos um negativo verdadeiro
+                    fscanf(f, "%d %d", &v1, &v2);
+                    if (v1holder != v1)
+                    {
+                        if (v1holder <= 50)
+                        {
+                            conex = 50 - v1holder; //para calcular os falsos negativos, ao terminar de verificar um nodo, nos calculamos quantas conexoes deveriam existir, e subtraimos disto o numero de positivos verdadeiros, a diferença é então os falsos negativos 
+                            fn += (conex - tp);
+                        }
+                        total_tp += tp;
+                        tp = 0;
+                        total_fn += fn;
+                        fn = 0;
+                        total_fp += fp;
+                        fp = 0;
+                        total_tn += tn;
+                        tn = 0;
+                        v1holder = v1;
+                    }
+                    if (flag == 1)
+                        break;                   
+                }
+            case 2:
+                while(1){
+                    if(v1 == 149)
+                        flag = 1;
+                    if (v1 > 50 && v1 <= 100 && v2 > 50 && v2 <= 100)
+                        tp += 1;
+                    else if ((v1 > 50 && v1 <= 100 && (v2 <= 50 || v2 > 100)))
+                        fp += 1;
+                    else if ((v2 > 50 && v2 <= 100 && (v1 <= 50 || v1 > 100)))
+                        fp += 1;
+                    else
+                        tn += 1;
+                    fscanf(f, "%d %d", &v1, &v2);
+                    if (v1holder != v1)
+                    {
+                        if (v1holder > 50 && v1holder <= 100){
+                            conex = 100 - v1holder;
+                            fn += (conex - tp);   
+                        }
+                        total_tp += tp;
+                        tp = 0;
+                        total_fn += fn;
+                        fn = 0;
+                        total_fp += fp;
+                        fp = 0;
+                        total_tn += tn;
+                        tn = 0;
+                        v1holder = v1;
+                    }
+                    if (flag == 1)
+                    break;
+                }
+            case 3:
+                while(1){
+                    if(v1 == 149)
+                        flag = 1;
+                    if (v1 < 100 && v2 < 100)
+                        tp += 1;
+                    else if (v1 <= 100 && v2 > 100)
+                        fp += 1;
+                    else
+                        tn += 1;
+                    fscanf(f, "%d %d", &v1, &v2);
+                    if (v1holder != v1)
+                    {
+                        if (v1holder > 100){
+                            conex = 150 - v1holder;
+                            fn += (conex - tp);
+                        }
+                        total_tp += tp;
+                        tp = 0;
+                        total_fn += fn;
+                        fn = 0;
+                        total_fp += fp;
+                        fp = 0;
+                        total_tn += tn;
+                        tn = 0;
+                        v1holder = v1;
+                    }
+                    if (flag == 1)
+                    break;
+                }        
         }
-        else if (v1 <= 50 && v2 > 50)
-        {
-            fp += 1;
-            fn += 1;
-        }
-        else if (v1 > 50 && v2 <= 50)
-        {
-            fn += 1;
-            fp += 1;
-        }
-        else
-        {
-            tn += 2;
-        }
-    }
+
     if (f)
         fclose(f);
-    double acc = (double)(tp + tn) / (tp + tn + fp + fn);
+    printf("Positivos verdadeiros: %d\nNegativos verdadeiros: %d\nPositivos falsos: %d\nNegativos falsos: %d\n", total_tp, total_tn, total_fp, total_fn);
+    double acc = (double)(total_tp + total_tn) / (total_tp + total_tn + total_fp + total_fn);
     return acc;
 }

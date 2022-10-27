@@ -7,12 +7,12 @@ int main()
     double **matrix = NULL;
     struct descritor *desc = NULL;
     double acc;
-    int escolha = 5;
+    int sc = 5;
     while (1)
     {
         printf("Digite 1 para montar a matriz e gerar um arquivo de texto representando o grafo\nDigite 2 para importar o grafo de um arquivo de texto existente\nDigite 3 para printar o grafo\nDigite 4 para calcular a acuracia\nDigite 0 para sair\n");
-        scanf("%d", &escolha);
-        switch (escolha)
+        scanf("%d", &sc);
+        switch (sc)
         {
         case 1:
             matrix = cria_tabela();
